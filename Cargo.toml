@@ -5,3 +5,4 @@ authors = ["Koji.Ota"]
 
 [dependencies]
 rustbox = "*"
+hyper = "0.7.2"
