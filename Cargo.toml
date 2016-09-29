@@ -1,0 +1,6 @@
+[package]
+name = "bb_prs"
+version = "0.1.0"
+authors = ["Koji.Ota"]
+
+[dependencies]
