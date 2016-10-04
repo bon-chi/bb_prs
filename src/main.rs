@@ -20,7 +20,7 @@ const BITBUCKET_USERNAME: &'static str = "BITBUCKET_USERNAME";
 const BITBUCKET_PASSWORD: &'static str = "BITBUCKET_PASSWORD";
 
 fn main() {
-    send_request();
+    let result = send_request();
     let rustbox = match RustBox::init(Default::default()) {
         Result::Ok(v) => v,
         Result::Err(e) => panic!("{}", e),
@@ -68,7 +68,7 @@ fn main() {
     }
 }
 
-fn send_request() {
+fn send_request() -> Result<String, &'static str> {
     if let Ok(api_url) = env::var(BITBUCKET_API_URL) {
         if let Ok(user_name) = env::var(BITBUCKET_USERNAME) {
             if let Ok(password) = env::var(BITBUCKET_PASSWORD) {
@@ -86,7 +86,9 @@ fn send_request() {
                 let mut result = String::new();
                 res.read_to_string(&mut result);
                 println!("{:?}", result);
+                return Ok(result);
             }
         }
     }
+    return Err("failed to get prs");
 }
