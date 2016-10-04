@@ -1,5 +1,6 @@
 extern crate rustbox;
 extern crate hyper;
+extern crate rustc_serialize;
 
 use std::env;
 use std::error::Error;
@@ -11,6 +12,8 @@ use rustbox::Key;
 use hyper::client::Client;
 use std::io::Read;
 use hyper::header::{Headers, Authorization, Basic};
+
+use rustc_serialize::json;
 
 const BITBUCKET_API_URL: &'static str = "BITBUCKET_API_URL";
 const BITBUCKET_USERNAME: &'static str = "BITBUCKET_USERNAME";
