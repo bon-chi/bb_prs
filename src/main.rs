@@ -19,8 +19,124 @@ const BITBUCKET_API_URL: &'static str = "BITBUCKET_API_URL";
 const BITBUCKET_USERNAME: &'static str = "BITBUCKET_USERNAME";
 const BITBUCKET_PASSWORD: &'static str = "BITBUCKET_PASSWORD";
 
+#[derive(Debug, RustcDecodable, RustcEncodable)]
+struct BBResponse {
+    size: i32,
+    limit: i32,
+    is_last_page: bool,
+    values: Vec<PullRequest>,
+}
+
+#[derive(Debug, RustcDecodable, RustcEncodable)]
+struct PullRequest {
+    title: String,
+    state: String,
+    url: String,
+}
+
 fn main() {
     let result = send_request();
+    // let decoded_response = json::decode(&(result.unwrap())).unwrap();
+    let response = json::Json::from_str(&(result.unwrap())).unwrap();
+    println!("{}",
+             response.find("values").unwrap()[0].find("title").unwrap());
+    // println!("{:?}", response.find("values").unwrap());
+    // let values: json::Array = response.find("values").unwrap();
+    let values = response.find("values").unwrap();
+    let pull_requests = match values {
+        &json::Json::Array(ref pull_request) => {
+            pull_request.into_iter()
+                .map(|request| {
+                    PullRequest {
+                        title: request.find("title").unwrap().to_string(),
+                        state: request.find("state").unwrap().to_string(),
+                        url: request.find("links").unwrap().find("self").unwrap()[0]
+                            .find("href")
+                            .unwrap()
+                            .to_string(),
+                    }
+                })
+                .collect::<Vec<PullRequest>>()
+        }
+        &json::Json::I64(_) => {
+            let mut vec = Vec::new();
+            let pr = PullRequest {
+                title: "none".to_string(),
+                state: "none".to_string(),
+                url: "none".to_string(),
+            };
+            vec.push(pr);
+            vec
+        }
+        &json::Json::U64(_) => {
+            let mut vec = Vec::new();
+            let pr = PullRequest {
+                title: "none".to_string(),
+                state: "none".to_string(),
+                url: "none".to_string(),
+            };
+            vec.push(pr);
+            vec
+        }
+        &json::Json::F64(_) => {
+            let mut vec = Vec::new();
+            let pr = PullRequest {
+                title: "none".to_string(),
+                state: "none".to_string(),
+                url: "none".to_string(),
+            };
+            vec.push(pr);
+            vec
+        }
+        &json::Json::String(_) => {
+            let mut vec = Vec::new();
+            let pr = PullRequest {
+                title: "none".to_string(),
+                state: "none".to_string(),
+                url: "none".to_string(),
+            };
+            vec.push(pr);
+            vec
+        }
+        &json::Json::Boolean(_) => {
+            let mut vec = Vec::new();
+            let pr = PullRequest {
+                title: "none".to_string(),
+                state: "none".to_string(),
+                url: "none".to_string(),
+            };
+            vec.push(pr);
+            vec
+        }
+        &json::Json::Object(_) => {
+            let mut vec = Vec::new();
+            let pr = PullRequest {
+                title: "none".to_string(),
+                state: "none".to_string(),
+                url: "none".to_string(),
+            };
+            vec.push(pr);
+            vec
+        }
+        Null => {
+            let mut vec = Vec::new();
+            let pr = PullRequest {
+                title: "none".to_string(),
+                state: "none".to_string(),
+                url: "none".to_string(),
+            };
+            vec.push(pr);
+            vec
+        }
+    };
+    println!("{:?}", pull_requests);
+    // let pull_requests = response.find("values").unwrap().into_iter().map(|pull_request| {
+    //     PullRequest {
+    //         title: pull_request.find("title").unwrap(),
+    //         state: pull_request.find("state").unwrap(),
+    //         url: pull_request.find("url").unwrap(),
+    //     }
+    // });
     let rustbox = match RustBox::init(Default::default()) {
         Result::Ok(v) => v,
         Result::Err(e) => panic!("{}", e),
@@ -85,7 +201,7 @@ fn send_request() -> Result<String, &'static str> {
                     .unwrap();
                 let mut result = String::new();
                 res.read_to_string(&mut result);
-                println!("{:?}", result);
+                // println!("{:?}", result);
                 return Ok(result);
             }
         }
