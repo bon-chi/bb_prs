@@ -38,8 +38,8 @@ fn main() {
     let result = send_request();
     // let decoded_response = json::decode(&(result.unwrap())).unwrap();
     let response = json::Json::from_str(&(result.unwrap())).unwrap();
-    println!("{}",
-             response.find("values").unwrap()[0].find("title").unwrap());
+    // println!("{}",
+    //          response.find("values").unwrap()[0].find("title").unwrap());
     // println!("{:?}", response.find("values").unwrap());
     // let values: json::Array = response.find("values").unwrap();
     let values = response.find("values").unwrap();
@@ -129,7 +129,7 @@ fn main() {
             vec
         }
     };
-    println!("{:?}", pull_requests);
+    // println!("{:?}", pull_requests);
     // let pull_requests = response.find("values").unwrap().into_iter().map(|pull_request| {
     //     PullRequest {
     //         title: pull_request.find("title").unwrap(),
@@ -142,20 +142,26 @@ fn main() {
         Result::Err(e) => panic!("{}", e),
     };
 
-    let mut query = String::new();
-
     rustbox.print(0,
                   0,
                   rustbox::RB_BOLD,
                   Color::White,
                   Color::Black,
                   "bb_prs > type your ticket name");
-    rustbox.print(1,
-                  3,
-                  rustbox::RB_BOLD,
-                  Color::White,
-                  Color::Black,
-                  "Press 'q' to quit.");
+
+    // let mut query = String::new();
+    let mut query = String::from("bb_prs > ");
+    let mut pull_requests_num = 1;
+    for pull_request in &pull_requests {
+        rustbox.print(0,
+                      pull_requests_num,
+                      rustbox::RB_BOLD,
+                      Color::White,
+                      Color::Black,
+                      pull_request.title.as_str());
+        pull_requests_num += 1;
+    }
+
     rustbox.present();
     loop {
         rustbox.clear();
@@ -172,7 +178,17 @@ fn main() {
                                       rustbox::RB_NORMAL,
                                       Color::Default,
                                       Color::Default,
-                                      &query)
+                                      &query);
+                        pull_requests_num = 1;
+                        for pull_request in &pull_requests {
+                            rustbox.print(0,
+                                          pull_requests_num,
+                                          rustbox::RB_BOLD,
+                                          Color::White,
+                                          Color::Black,
+                                          pull_request.title.as_str());
+                            pull_requests_num += 1;
+                        }
                     }
                     _ => {}
                 }
