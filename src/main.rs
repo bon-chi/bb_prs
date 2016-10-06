@@ -35,15 +35,74 @@ struct PullRequest {
 }
 
 fn main() {
+    let pull_requests = get_pull_requests();
+    let rustbox = match RustBox::init(Default::default()) {
+        Result::Ok(v) => v,
+        Result::Err(e) => panic!("{}", e),
+    };
+
+    rustbox.print(0,
+                  0,
+                  rustbox::RB_BOLD,
+                  Color::White,
+                  Color::Black,
+                  "bb_prs > type your ticket name");
+
+    let mut query = String::from("bb_prs > ");
+    let mut pull_requests_num = 1;
+    for pull_request in &pull_requests {
+        rustbox.print(0,
+                      pull_requests_num,
+                      rustbox::RB_BOLD,
+                      Color::White,
+                      Color::Black,
+                      pull_request.title.as_str());
+        pull_requests_num += 1;
+    }
+
+    rustbox.present();
+    loop {
+        rustbox.clear();
+        match rustbox.poll_event(false) {
+            Ok(rustbox::Event::KeyEvent(key)) => {
+                match key {
+                    Key::Char('q') => {
+                        break;
+                    }
+                    Key::Char(c) => {
+                        query.push(c);
+                        rustbox.print(0,
+                                      0,
+                                      rustbox::RB_NORMAL,
+                                      Color::Default,
+                                      Color::Default,
+                                      &query);
+                        pull_requests_num = 1;
+                        for pull_request in &pull_requests {
+                            rustbox.print(0,
+                                          pull_requests_num,
+                                          rustbox::RB_BOLD,
+                                          Color::White,
+                                          Color::Black,
+                                          pull_request.title.as_str());
+                            pull_requests_num += 1;
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            Err(e) => panic!("{}", e.description()),
+            _ => {}
+        }
+        rustbox.present();
+    }
+}
+
+fn get_pull_requests() -> Vec<PullRequest> {
     let result = send_request();
-    // let decoded_response = json::decode(&(result.unwrap())).unwrap();
     let response = json::Json::from_str(&(result.unwrap())).unwrap();
-    // println!("{}",
-    //          response.find("values").unwrap()[0].find("title").unwrap());
-    // println!("{:?}", response.find("values").unwrap());
-    // let values: json::Array = response.find("values").unwrap();
     let values = response.find("values").unwrap();
-    let pull_requests = match values {
+    match values {
         &json::Json::Array(ref pull_request) => {
             pull_request.into_iter()
                 .map(|request| {
@@ -128,75 +187,6 @@ fn main() {
             vec.push(pr);
             vec
         }
-    };
-    // println!("{:?}", pull_requests);
-    // let pull_requests = response.find("values").unwrap().into_iter().map(|pull_request| {
-    //     PullRequest {
-    //         title: pull_request.find("title").unwrap(),
-    //         state: pull_request.find("state").unwrap(),
-    //         url: pull_request.find("url").unwrap(),
-    //     }
-    // });
-    let rustbox = match RustBox::init(Default::default()) {
-        Result::Ok(v) => v,
-        Result::Err(e) => panic!("{}", e),
-    };
-
-    rustbox.print(0,
-                  0,
-                  rustbox::RB_BOLD,
-                  Color::White,
-                  Color::Black,
-                  "bb_prs > type your ticket name");
-
-    // let mut query = String::new();
-    let mut query = String::from("bb_prs > ");
-    let mut pull_requests_num = 1;
-    for pull_request in &pull_requests {
-        rustbox.print(0,
-                      pull_requests_num,
-                      rustbox::RB_BOLD,
-                      Color::White,
-                      Color::Black,
-                      pull_request.title.as_str());
-        pull_requests_num += 1;
-    }
-
-    rustbox.present();
-    loop {
-        rustbox.clear();
-        match rustbox.poll_event(false) {
-            Ok(rustbox::Event::KeyEvent(key)) => {
-                match key {
-                    Key::Char('q') => {
-                        break;
-                    }
-                    Key::Char(c) => {
-                        query.push(c);
-                        rustbox.print(0,
-                                      0,
-                                      rustbox::RB_NORMAL,
-                                      Color::Default,
-                                      Color::Default,
-                                      &query);
-                        pull_requests_num = 1;
-                        for pull_request in &pull_requests {
-                            rustbox.print(0,
-                                          pull_requests_num,
-                                          rustbox::RB_BOLD,
-                                          Color::White,
-                                          Color::Black,
-                                          pull_request.title.as_str());
-                            pull_requests_num += 1;
-                        }
-                    }
-                    _ => {}
-                }
-            }
-            Err(e) => panic!("{}", e.description()),
-            _ => {}
-        }
-        rustbox.present();
     }
 }
 
