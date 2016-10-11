@@ -30,8 +30,10 @@ struct BBResponse {
 #[derive(Debug, RustcDecodable, RustcEncodable)]
 struct PullRequest {
     title: String,
+    description: String,
     state: String,
     url: String,
+    display_id: String,
 }
 
 fn main() {
@@ -48,7 +50,8 @@ fn main() {
                   Color::Black,
                   "bb_prs > type your ticket name");
 
-    let mut query = String::from("bb_prs > ");
+    let mut query = String::new();
+    // let mut query = String::from("bb_prs > ");
     let mut pull_requests_num = 1;
     for pull_request in &pull_requests {
         rustbox.print(0,
@@ -59,6 +62,7 @@ fn main() {
                       pull_request.title.as_str());
         pull_requests_num += 1;
     }
+    let mut matched_pull_requests = get_matched_pull_requests(pull_requests, query.to_string());
 
     rustbox.present();
     loop {
@@ -76,9 +80,17 @@ fn main() {
                                       rustbox::RB_NORMAL,
                                       Color::Default,
                                       Color::Default,
+                                      "bb_prs > ");
+                        rustbox.print(9,
+                                      0,
+                                      rustbox::RB_NORMAL,
+                                      Color::Default,
+                                      Color::Default,
                                       &query);
                         pull_requests_num = 1;
-                        for pull_request in &pull_requests {
+                        matched_pull_requests = get_matched_pull_requests(matched_pull_requests,
+                                                                          query.to_string());
+                        for pull_request in &matched_pull_requests {
                             rustbox.print(0,
                                           pull_requests_num,
                                           rustbox::RB_BOLD,
@@ -98,6 +110,12 @@ fn main() {
     }
 }
 
+fn get_matched_pull_requests(pull_requests: Vec<PullRequest>, query: String) -> Vec<PullRequest> {
+    pull_requests.into_iter()
+        .filter(|pull_request| pull_request.title.contains(query.as_str()))
+        .collect::<Vec<PullRequest>>()
+}
+
 fn get_pull_requests() -> Vec<PullRequest> {
     let result = send_request();
     let response = json::Json::from_str(&(result.unwrap())).unwrap();
@@ -113,6 +131,17 @@ fn get_pull_requests() -> Vec<PullRequest> {
                             .find("href")
                             .unwrap()
                             .to_string(),
+                        // description: request.find("description").unwrap().to_string(),
+                        description: match request.find("description") {
+                            None => "none".to_string(),
+                            Some(des) => des.to_string(),
+                        },
+                        // description: "null".to_string(),
+                        display_id: request.find("fromRef")
+                            .unwrap()
+                            .find("displayId")
+                            .unwrap()
+                            .to_string(),
                     }
                 })
                 .collect::<Vec<PullRequest>>()
@@ -123,6 +152,8 @@ fn get_pull_requests() -> Vec<PullRequest> {
                 title: "none".to_string(),
                 state: "none".to_string(),
                 url: "none".to_string(),
+                description: "none".to_string(),
+                display_id: "none".to_string(),
             };
             vec.push(pr);
             vec
@@ -133,6 +164,8 @@ fn get_pull_requests() -> Vec<PullRequest> {
                 title: "none".to_string(),
                 state: "none".to_string(),
                 url: "none".to_string(),
+                description: "none".to_string(),
+                display_id: "none".to_string(),
             };
             vec.push(pr);
             vec
@@ -143,6 +176,8 @@ fn get_pull_requests() -> Vec<PullRequest> {
                 title: "none".to_string(),
                 state: "none".to_string(),
                 url: "none".to_string(),
+                description: "none".to_string(),
+                display_id: "none".to_string(),
             };
             vec.push(pr);
             vec
@@ -153,6 +188,8 @@ fn get_pull_requests() -> Vec<PullRequest> {
                 title: "none".to_string(),
                 state: "none".to_string(),
                 url: "none".to_string(),
+                description: "none".to_string(),
+                display_id: "none".to_string(),
             };
             vec.push(pr);
             vec
@@ -163,6 +200,8 @@ fn get_pull_requests() -> Vec<PullRequest> {
                 title: "none".to_string(),
                 state: "none".to_string(),
                 url: "none".to_string(),
+                description: "none".to_string(),
+                display_id: "none".to_string(),
             };
             vec.push(pr);
             vec
@@ -173,6 +212,8 @@ fn get_pull_requests() -> Vec<PullRequest> {
                 title: "none".to_string(),
                 state: "none".to_string(),
                 url: "none".to_string(),
+                description: "none".to_string(),
+                display_id: "none".to_string(),
             };
             vec.push(pr);
             vec
@@ -183,6 +224,8 @@ fn get_pull_requests() -> Vec<PullRequest> {
                 title: "none".to_string(),
                 state: "none".to_string(),
                 url: "none".to_string(),
+                description: "none".to_string(),
+                display_id: "none".to_string(),
             };
             vec.push(pr);
             vec
